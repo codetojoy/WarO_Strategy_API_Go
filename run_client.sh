@@ -1,4 +1,4 @@
 #!/bin/bash
 
-rm -f client 
-go run client.go 
+rm -f client
+go run client.go common.go

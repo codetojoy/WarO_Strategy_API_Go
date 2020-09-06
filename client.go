@@ -33,7 +33,7 @@ func callServer(ch chan string, url string) {
 }
 
 func buildUrl(port int) string {
-    baseUrl := fmt.Sprintf("http://localhost:%d/waro/strategy", port)
+    baseUrl := fmt.Sprintf("http://localhost:%d%v", port, BASE_URL)
 
     req, err := http.NewRequest("GET", baseUrl, nil)
 
@@ -42,12 +42,12 @@ func buildUrl(port int) string {
     }
 
     q := req.URL.Query()
-    q.Add("mode", "max")
-    q.Add("prize_card", "10")
-    q.Add("max_card", "20")
-    q.Add("cards", "3")
-    q.Add("cards", "7")
-    q.Add("cards", "11")
+    q.Add(MODE_PARAM, "min")
+    q.Add(PRIZE_CARD_PARAM, "10")
+    q.Add(MAX_CARD_PARAM, "20")
+    q.Add(CARDS_PARAM, "3")
+    q.Add(CARDS_PARAM, "7")
+    q.Add(CARDS_PARAM, "11")
     req.URL.RawQuery = q.Encode()
 
     return req.URL.String()

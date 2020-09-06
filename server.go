@@ -91,25 +91,20 @@ func handleError(writer http.ResponseWriter) {
     writer.Write([]byte(bodyStr))
 }
 
-const CARDS_PARAM = "cards"
-const MAX_CARD_PARAM = "max_card"
-const MODE_PARAM = "mode"
-const PRIZE_CARD_PARAM = "prize_card"
-
-type MyParams struct {
+type Params struct {
     cards []int
     maxCard int
     mode string
     prizeCard int
 }
 
-func (params *MyParams) String() string {
+func (params *Params) String() string {
     return fmt.Sprintf("mode: %v prizeCard: %d maxCard: %d cards: %v",
             params.mode, params.prizeCard, params.maxCard, params.cards)
 }
 
-func getParams(req *http.Request) (MyParams, error) {
-    result := MyParams{}
+func getParams(req *http.Request) (Params, error) {
+    result := Params{}
     var err error
 
     maxCard, e1 := getIntParam(MAX_CARD_PARAM, req)
@@ -138,6 +133,8 @@ func handleGet(writer http.ResponseWriter, req *http.Request) {
     params, err := getParams(req)
 
     if err == nil {
+        card := selectCard(params)
+
         writer.WriteHeader(http.StatusOK)
         now := getTime()
         fmt.Printf("TRACER %v %v\n", now, params.String())
@@ -145,7 +142,7 @@ func handleGet(writer http.ResponseWriter, req *http.Request) {
 
         // TODO: encode JSON
         body.WriteString("{");
-        body.WriteString(fmt.Sprintf(`"card": 10`))
+        body.WriteString(fmt.Sprintf(`"card": %d`, card))
         body.WriteString("}");
 
         bodyStr := body.String()
@@ -189,7 +186,7 @@ func main() {
         portStr := fmt.Sprintf(":%d", port)
         fmt.Printf("TRACER running on port %d\n", port)
 
-        http.HandleFunc("/waro/strategy", home)
+        http.HandleFunc(BASE_URL, home)
         log.Fatal(http.ListenAndServe(portStr, nil))
     } else {
         fmt.Println("Usage.")
