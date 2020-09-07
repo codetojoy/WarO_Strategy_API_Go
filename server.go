@@ -1,15 +1,32 @@
 package main
 
 import (
+    "encoding/json"
     "errors"
     "fmt"
     "log"
     "net/http"
     "os"
-    "strings"
     "strconv"
     "time"
 )
+
+type Result struct {
+    Card int `json:"card"`
+    Message string `json:"message"`
+}
+
+func encodeAsJSON(card int, message string) string {
+    result := Result{Card: card, Message: message}
+
+    var jsonData []byte
+    jsonData, err := json.Marshal(result)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    return string(jsonData)
+}
 
 // cribbed from https://dev.to/moficodes/build-your-first-rest-api-with-go-2gcj
 
@@ -79,14 +96,9 @@ func handleError(writer http.ResponseWriter) {
     const errorValue = -99
     now := getTime()
 
-    // TODO: encode JSON
-    body := strings.Builder{}
-    body.WriteString("{");
-    body.WriteString(fmt.Sprintf(`"message": "TRACER %v error",`, now))
-    body.WriteString(fmt.Sprintf(`"card": %d`, errorValue))
-    body.WriteString("},");
+    message := fmt.Sprintf(`"message": "TRACER %v error",`, now)
+    bodyStr := encodeAsJSON(errorValue, message)
 
-    bodyStr := body.String()
     fmt.Println(bodyStr)
     writer.Write([]byte(bodyStr))
 }
@@ -138,14 +150,10 @@ func handleGet(writer http.ResponseWriter, req *http.Request) {
         writer.WriteHeader(http.StatusOK)
         now := getTime()
         fmt.Printf("TRACER %v %v\n", now, params.String())
-        body := strings.Builder{}
 
         // TODO: encode JSON
-        body.WriteString("{");
-        body.WriteString(fmt.Sprintf(`"card": %d`, card))
-        body.WriteString("}");
+        bodyStr := encodeAsJSON(card, "")
 
-        bodyStr := body.String()
         fmt.Println(bodyStr)
         writer.Write([]byte(bodyStr))
     } else {
